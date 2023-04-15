@@ -7,7 +7,7 @@ from typing import Tuple
 from numbers import Number
 from collections import defaultdict
 
-from .types_ import Command, Thunk
+from .types_ import Action, Thunk
 from .exceptions import InvalidInput
 from .operations import operations
 
@@ -26,20 +26,20 @@ class SimpleCalculator:
         :return: None
         """
         try:
-            command, data = self.parse(line)
-            command(data)
+            action, data = self.parse(line)
+            action(data)
         except InvalidInput as e:
             print(e)
 
-    def parse(self, line: str) -> Tuple[Command, Thunk | Number]:
+    def parse(self, line: str) -> Tuple[Action, Thunk | Number]:
         """
-        A pure function which only returns parsed input but does nothing,  with it, in order to make it easier to test using UT
+        A pure function which returns an Action and a Thunk or Number. This is a pure function, to make UT easier.
 
         A well-formed line of input has the following syntax:
         <register> <operation> <value>
 
         :param line: string input value from user
-        :return: (Command, Data), where the Command
+        :return: (Action, Data), where the Action
         """
         items = line.split(" ")
 
@@ -51,7 +51,7 @@ class SimpleCalculator:
 
         raise InvalidInput("bad syntax: only 2 or 3 arguments allowed, delimited by space")
 
-    def parse_store(self, register, op, val) -> Tuple[Command, Thunk]:
+    def parse_store(self, register, op, val) -> Tuple[Action, Thunk]:
         if not is_valid_register(register):
             raise InvalidInput("register was not alphanumeric with at least one letter")
 
@@ -61,7 +61,7 @@ class SimpleCalculator:
             raise InvalidInput(f"'{op}' is not a supported operation")
 
         try:
-            value = float(val)
+            value = float(val)  # treat numbers as float to not lose decimals
         except ValueError:
             if is_valid_register(val):
                 value = val
@@ -70,9 +70,9 @@ class SimpleCalculator:
 
         return self.store, Thunk(target=register, operation=operation, value=value)
 
-    def parse_print(self, command, register) -> Tuple[Command, Thunk | Number]:
-        if command != "print":
-            raise InvalidInput(f"bad syntax: '{command}' is not a valid command")
+    def parse_print(self, action, register) -> Tuple[Action, Thunk | Number]:
+        if action != "print":
+            raise InvalidInput(f"bad syntax: '{action}' is not a valid action")
 
         return print, self.evaluate(register)
 
@@ -80,32 +80,43 @@ class SimpleCalculator:
         """
         Store pending operations in memory
         :param thunks: variadic list of Thunk, to be added to pending operations
-        :return:
+        :return: self
         """
         for thunk in thunks:
             self._thunks_[thunk.target].append(thunk)
         return self
 
-    def evaluate(self, register) -> Number:
+    def evaluate(self, key) -> Number:
+        """
+        Computes thunks pending for a register. Operates recursively and evaluates dependant values as needed.
 
-        # apply and clear the pending operations
+        :param key: either register or value
+        :return: evaluated number, which is an int or a float
+        """
+        if isinstance(key, Number):
+            return key
+
+        register = key
+        value = self._values_[register]
+
+        # Apply and clear the pending operations
         for thunk in self._thunks_.pop(register, []):
             try:
                 # Apply recursive evaluation to evaluate dependencies
-                right = thunk.value if isinstance(thunk.value, Number) else self.evaluate(thunk.value)
-                self._values_[register] = thunk.operation(self._values_[register], right)
+                value = thunk.operation(value, self.evaluate(thunk.value))
             except Exception as e:
                 print(e)  # The input is rejected and the value is unchanged
 
+        # Put evaluated value back into memory
+        self._values_[register] = value
+
         # If a number is an int and not a float, remove the .0 from the output
-        value = self._values_[register]
         return integer if (integer := int(value)) == value else value
 
 
 def is_valid_register(register: str) -> bool:
     """
-    A valid register string is at least one character [a-z] preceeded and followed by any numnber of
-    alphanumeric strings [a-z0-9]
+    A valid register string is at least one character [a-z] preceded and followed by any number of alphanumeric strings
 
     :param register:
     :return: bool

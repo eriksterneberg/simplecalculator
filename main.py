@@ -8,7 +8,8 @@ from collections.abc import Generator
 from simplecalculator import SimpleCalculator
 
 
-QUIT_COMMAND = "quit"
+class Commands:
+    QUIT = "quit"
 
 
 def get_lines() -> Generator[str]:
@@ -25,7 +26,8 @@ def get_lines() -> Generator[str]:
         try:
             with open(filename) as f:
                 for row in f:
-                    yield row.strip().lower()
+                    if len(row_ := row.strip().lower()) > 0:  # ignore empty lines
+                        yield row_
         except FileNotFoundError:
 
             # File not found, will exit loop. When 'return' is used this will exit a for loop looping over get_lines.
@@ -34,10 +36,15 @@ def get_lines() -> Generator[str]:
 
     else:
         # Falls back to looping over user input until the string 'quit' is encountered.
-        # Leading and trailing whitespace is removed.
-        while string := input("> ").strip().lower():
-            if string == QUIT_COMMAND:
+        while True:
+            string = input("> ").strip().lower()  # Leading and trailing whitespace is removed.
+
+            if string == Commands.QUIT:
                 break
+
+            if string == "":
+                continue  # User will expect that an empty input is ignored
+
             yield string
 
 

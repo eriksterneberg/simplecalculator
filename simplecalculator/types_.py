@@ -6,7 +6,9 @@ from typing import NewType, Callable
 from collections import namedtuple
 
 
-# Lazily evaluated target, operation and value
+# Lazily evaluated operation(target, value)
 Thunk = namedtuple("Thunk", ["target", "operation", "value"])
 
-Command = NewType('Command', Callable[[Thunk], None])
+# Action is either the print command which prints to console, or the store function,
+# which simply stores the thunk in memory
+Action = NewType('Action', Callable[[Thunk], None])

@@ -4,9 +4,7 @@ Unit tests for the method evaluate
 
 import unittest
 
-from simplecalculator.types_ import Thunk
-from simplecalculator.operations import add, mul, sub
-from simplecalculator import SimpleCalculator
+from simplecalculator import Thunk, add, mul, sub, SimpleCalculator
 
 
 class TestEvaluateSimple(unittest.TestCase):
@@ -24,8 +22,7 @@ class TestEvaluateSimple(unittest.TestCase):
 
         # After having evaluated a value, it
         for _ in range(2):
-            result = calculator.evaluate("a")
-            self.assertEqual(40, result)
+            self.assertEqual(40, calculator.evaluate("a"))
 
     def test_evaluate_simple_operations_using_floats(self):
         result = SimpleCalculator().store(Thunk("a", add, 1.3), Thunk("a", mul, 2)).evaluate("a")
@@ -56,14 +53,17 @@ class TestEvaluateRegistersAsValues(unittest.TestCase):
 
         self.assertEqual(90, calculator.evaluate("result"))
 
-    # def test_evaluate_register_as_value_circular(self):
-    #     calculator = SimpleCalculator()
-    #
-    #     calculator.store(Thunk("a", add, "b"))
-    #     calculator.store(Thunk("b", add, "a"))
-    #     calculator.store(Thunk("a", add, 10))
-    #     calculator.store(Thunk("b", add, 20))
-    #
-    #     self.assertEqual(calculator.evaluate("a"), 10)
-    #     self.assertEqual(calculator.evaluate("b"), 20)
-    #
+    def test_evaluate_register_as_value_circular(self):
+        calculator = SimpleCalculator().store(
+            Thunk("a", add, "b"),
+            Thunk("b", add, "a"),
+            Thunk("a", add, 10),
+            Thunk("b", add, 20),
+        )
+
+        # When 'a' is evaluated, 'b' is first evaluated to 0 + 20 = 20. Later 10 is added, which makes a = 30
+        self.assertEqual(calculator.evaluate("a"), 30)
+
+        # When 'b' is evaluated below, all pending thunks have already been calculated. When 'b' was evaluated, 'a'
+        # was zero because all thunks for 'a' had been evaluated, so b = 20.
+        self.assertEqual(calculator.evaluate("b"), 20)

@@ -4,8 +4,22 @@ Demo app to showcase writing Python FP-style
 ## Description
 The task is to build a simple calculator that can take commands from stdin or from a file.
 
-Clarifications:
-1. The app can technically support numeric-only registers, but this was disallowed for readability reasons
+On Circular Dependencies:
+Circular dependencies are avoided by only evaluating pending thunks for a register once. Consider the following case:
+```
+a add b
+b add a
+a add 10
+print a
+```
+The above will be evaluated like this:
+```
+a = 0 + b
+    b = 0 + a = 0 + 0 = 0
+    => a = 0
+a = a + 10 = 0 + 10 = 10
+```
+
 
 ## How to Build
 There are no dependencies, except Python >= 3.8.
@@ -49,5 +63,5 @@ $ python main.py input.txt
 - [X] Upgrade class to take the command "print <key>", upon which operations "thunks" are evaluated.
 - [X] Invalid commands should be logged to console. This includes values that causes operations to fail, such as "a divide 0". 
 - [X] Upgrade class to be able to use keys as values, evaluated as needed when "print <key>" command is used.
-- [ ] Detect and break loops
+- [X] Handle circular dependencies
 
