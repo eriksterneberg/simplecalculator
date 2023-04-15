@@ -16,6 +16,18 @@ Run this command to execute unit tests:
 $ make test
 ```
 
+Run test cases in assignment:
+```commandline
+$ python main.py test1.txt
+5
+3
+6
+$ python main.py test2.txt
+11
+$ python main.py test3.txt
+90
+```
+
 ## How to run
 The app takes data from stdin and prints them out in the terminal, like this:
 ```commandline
