@@ -13,6 +13,7 @@ from .operations import operations
 
 
 class SimpleCalculator:
+
     def __init__(self):
         self._thunks_ = defaultdict(list)
         self._values_ = defaultdict(int)
@@ -72,8 +73,15 @@ class SimpleCalculator:
 
         return print, self.evaluate(register)
 
-    def store(self, thunk: Thunk):
-        self._thunks_[thunk.target].append(thunk)
+    def store(self, *thunks):
+        """
+        Store pending operations in memory
+        :param thunks: variadic list of Thunk, to be added to pending operations
+        :return:
+        """
+        for thunk in thunks:
+            self._thunks_[thunk.target].append(thunk)
+        return self
 
     def evaluate(self, register) -> Number:
         # this is the value of the register so far
@@ -91,7 +99,4 @@ class SimpleCalculator:
         self._values_[register] = value
 
         # If a number is an int and not a float, remove the .0 from the output
-        if (integer := int(value)) == value:
-            return integer
-
-        return value
+        return integer if (integer := int(value)) == value else value

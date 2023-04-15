@@ -9,17 +9,18 @@ from simplecalculator.operations import add, mul, sub
 from simplecalculator import SimpleCalculator
 
 
-class TestEvaluate_Simple(unittest.TestCase):
+class TestEvaluateSimple(unittest.TestCase):
 
     def test_evaluate_missing_register(self):
         result = SimpleCalculator().evaluate("missing")
         self.assertEqual(result, 0)
 
     def test_evaluate_simple_operations_using_integers(self):
-        calculator = SimpleCalculator()
-
-        for thunk in Thunk("a", sub, 5), Thunk("a", mul, 2), Thunk("a", add, 50):
-            calculator.store(thunk)
+        calculator = SimpleCalculator().store(
+            Thunk("a", sub, 5),
+            Thunk("a", mul, 2),
+            Thunk("a", add, 50),
+        )
 
         # After having evaluated a value, it
         for _ in range(2):
@@ -27,31 +28,22 @@ class TestEvaluate_Simple(unittest.TestCase):
             self.assertEqual(result, 40)
 
     def test_evaluate_simple_operations_using_floats(self):
-        calculator = SimpleCalculator()
-
-        for thunk in Thunk("a", add, 1.3), Thunk("a", mul, 2):
-            calculator.store(thunk)
-
-        result = calculator.evaluate("a")
+        result = SimpleCalculator().store(Thunk("a", add, 1.3), Thunk("a", mul, 2)).evaluate("a")
         self.assertEqual(result, 2.6)
+
 
 class TestEvaluateRegistersAsValues(unittest.TestCase):
 
     def test_evaluate_register_as_value_happy_path(self):
-        calculator = SimpleCalculator()
-
-        thunks = [
+        calculator = SimpleCalculator().store(
             Thunk("result", add, "revenue"),
             Thunk("result", sub, "costs"),
             Thunk("revenue", add, 200),
             Thunk("costs", add, "salaries"),
             Thunk("salaries", add, 20),
-            Thunk("salaries", mul,  5),
+            Thunk("salaries", mul, 5),
             Thunk("costs", add, 10),
-        ]
-
-        for thunk in thunks:
-            calculator.store(thunk)
+        )
 
         self.assertEqual(calculator.evaluate("result"), 90)
 

@@ -35,10 +35,7 @@ class TestParseTwoParams(unittest.TestCase):
         self.assertEqual(command, print)
         self.assertEqual(data, 0)
 
-        calculator = SimpleCalculator()
-        calculator.store(Thunk("a", add, 10))
-
-        command, data = calculator.parse("print a")
+        command, data = SimpleCalculator().store(Thunk("a", add, 10)).parse("print a")
 
         self.assertEqual(command, print)
         self.assertEqual(data, 10)
