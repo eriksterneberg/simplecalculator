@@ -3,7 +3,6 @@ Implements all pure and impure methods that make up the Simple Calculator showca
 """
 
 import re
-import signal
 from typing import Tuple
 from numbers import Number
 from collections import defaultdict
@@ -14,6 +13,9 @@ from .operations import operations
 
 
 class SimpleCalculator:
+    """
+    A showcase of how to implement a simple calculator with lazy evaluation
+    """
 
     def __init__(self):
         self._thunks_ = defaultdict(list)
@@ -30,29 +32,37 @@ class SimpleCalculator:
             action, data = self.parse(line)
             action(data)
         except InvalidInput as e:
-            print(e)
+            print(e)  # log invalid input to console
 
     def parse(self, line: str) -> Tuple[Action, Thunk | Number]:
         """
         A pure function which returns an Action and a Thunk or Number. This is a pure function, to make UT easier.
 
         A well-formed line of input has the following syntax:
-        <register> <operation> <value>
+        <register> <operation> <value> OR print <register>
+
+        Examples of output:
+            print 10                          # to be printed in the console
+            self.store Thunk("a", add, 10)    # to be added into memory as a pending 'thunk'
 
         :param line: string input value from user
-        :return: (Action, Data), where the Action
+        :return: Action, Thunk | Number
         """
-        items = re.split("\\s+", line)
-
-        if len(items) == 3:
+        if len(items := re.split("\\s+", line)) == 3:
             return self.parse_store(*items)
-
-        if len(items) == 2:
+        elif len(items) == 2:
             return self.parse_print(*items)
-
-        raise InvalidInput("bad syntax: only 2 or 3 arguments allowed, delimited by space")
+        raise InvalidInput("bad syntax: only 2 or 3 arguments allowed, delimited by any amount of whitespace")
 
     def parse_store(self, register, op, val) -> Tuple[Action, Thunk]:
+        """
+        Takes three arguments that signify the operation its parameters that should be lazily executed.
+
+        :param register: an alphanumeric value
+        :param op: operation, such as add, mul or sub from the operator module in the standard library
+        :param val: either a register or a number
+        :return: Action and a Thunk
+        """
         if not is_valid_register(register):
             raise InvalidInput("register was not alphanumeric with at least one letter")
 
@@ -71,7 +81,13 @@ class SimpleCalculator:
 
         return self.store, Thunk(target=register, operation=operation, value=value)
 
-    def parse_print(self, action, register) -> Tuple[Action, Thunk | Number]:
+    def parse_print(self, action, register) -> Tuple[Action, Number]:
+        """
+
+        :param action: currently only support the action 'print'
+        :param register: register, will evaluate to zero if previously unseen
+        :return: the built-in print function and a number
+        """
         if action != Actions.PRINT:
             raise InvalidInput(f"bad syntax: '{action}' is not a valid action")
 

@@ -1,8 +1,11 @@
 # simplecalculator
-Demo app to showcase writing Python FP-style
+Demo app to showcase writing basic Python syntax
 
 ## Description
 The task is to build a simple calculator that can take commands from stdin or from a file.
+
+On Definition of Alphanumeric:
+Alphanumeric means a combination of [a-z] and [0-9], with at least one of the former.
 
 On Circular Dependencies:
 Circular dependencies are avoided by only evaluating pending thunks for a register once. Consider the following case:
@@ -22,38 +25,60 @@ a = a + 10 = 0 + 10 = 10
 
 
 ## How to Build
-There are no dependencies, except Python >= 3.8.
+To run locally, install Python version 3.11.
 
-## How to Test
+Build with Docker:
+```commandline
+$ make build
+```
+
+
+## How to Test Locally
 Run this command to execute unit tests:
 ```commandline
 $ make test
 ```
 
-Run test cases in assignment:
+Run test cases from text files, locally:
 ```commandline
-$ python main.py test1.txt
+$ python3.11 main.py tests/test1.txt
 5
 3
 6
-$ python main.py test2.txt
+$ python3.11 main.py tests/test2.txt
 11
-$ python main.py test3.txt
+$ python3.11 main.py tests/test3.txt
 90
 ```
 
-## How to run
-The app takes data from stdin and prints them out in the terminal, like this:
+Run as interactive application:
 ```commandline
-$ python main.py
+$ python3.11 main.py
+> a add 10
+> print a
+10 
 > quit
 <program exits>
 ```
 
-It can also take contents from a file as input:
-``` commandline
-$ python main.py input.txt
+
+## How to Test Using Docker
+Run test cases from text files using Docker
+```commandline
+$ make filename=test3.txt run
+90
 ```
+
+Invoke console:
+```commandline
+$ make console
+> a add 10
+> print a
+10 
+> quit
+<program exits>
+```
+
 
 ## Roadmap
 - [X] Create a main.py file that takes input from stdin one line at a time and prints it in the terminal.
@@ -64,4 +89,5 @@ $ python main.py input.txt
 - [X] Invalid commands should be logged to console. This includes values that causes operations to fail, such as "a divide 0". 
 - [X] Upgrade class to be able to use keys as values, evaluated as needed when "print <key>" command is used.
 - [X] Handle circular dependencies
-
+- [X] Handle graceful exit for user input CTRL+C and CTRL+D
+- [X] Add build with Docker

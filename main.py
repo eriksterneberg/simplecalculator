@@ -8,7 +8,7 @@ from collections.abc import Generator
 
 from simplecalculator import SimpleCalculator, Actions
 
-
+# Global variable used to control graceful exit
 shutdown = False
 
 

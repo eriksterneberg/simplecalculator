@@ -14,7 +14,7 @@ class TestParseZeroOrTooManyParams(unittest.TestCase):
             with self.assertRaises(InvalidInput) as cm:
                 SimpleCalculator().parse(line)
 
-            self.assertEqual((str(cm.exception)), "bad syntax: only 2 or 3 arguments allowed, delimited by space")
+            self.assertEqual((str(cm.exception)), "bad syntax: only 2 or 3 arguments allowed, delimited by any amount of whitespace")
 
 
 class TestParseTwoParams(unittest.TestCase):
