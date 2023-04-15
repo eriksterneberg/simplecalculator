@@ -5,6 +5,9 @@ Entry point for the Simple Calculator project
 import sys
 from collections.abc import Generator
 
+from simplecalculator import SimpleCalculator
+
+
 QUIT_COMMAND = "quit"
 
 
@@ -30,13 +33,19 @@ def get_lines() -> Generator[str]:
             return
 
     else:
-        # Falls back to looping over user input until the string 'quit' is encountered
-        while string := input("> "):
+        # Falls back to looping over user input until the string 'quit' is encountered.
+        # Leading and trailing whitespace is removed.
+        while string := input("> ").strip().lower():
             if string == QUIT_COMMAND:
                 break
-            yield string.lower()
+            yield string
 
 
 if __name__ == "__main__":
+
+    # Init a calculator that holds all parsed user input
+    calculator = SimpleCalculator()
+
+    # Lazily iterate over input, letting the SimpleCalculator class store or print (evaluate) input
     for line in get_lines():
-        print(line)
+        calculator.process(line)
