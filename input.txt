@@ -1,0 +1,2 @@
+Hello, world!
+Is this input printed to terminal?
