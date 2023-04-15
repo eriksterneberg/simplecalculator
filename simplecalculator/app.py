@@ -3,17 +3,19 @@ Implements all pure and impure methods that make up the Simple Calculator showca
 """
 
 import re
-from typing import Tuple
+from typing import Tuple, List
 from numbers import Number
 from collections import defaultdict
 
-from .types_ import Command, Data
+from .types_ import Command, Thunk
 from .exceptions import InvalidInput
 from .operations import operations
 
 
 class SimpleCalculator:
-    _memory_ = defaultdict(float)
+    def __init__(self):
+        self._thunks_ = defaultdict(list)
+        self._values_ = defaultdict(int)
 
     def process(self, line: str) -> None:
         """
@@ -28,7 +30,7 @@ class SimpleCalculator:
         except InvalidInput as e:
             print(e)
 
-    def parse(self, line: str) -> Tuple[Command, Data | Number]:
+    def parse(self, line: str) -> Tuple[Command, Thunk | Number]:
         """
         A pure function which only returns parsed input but does nothing,  with it, in order to make it easier to test using UT
 
@@ -48,7 +50,7 @@ class SimpleCalculator:
 
         raise InvalidInput("bad syntax: only 2 or 3 arguments allowed, delimited by space")
 
-    def parse_store(self, register, op, val) -> Tuple[Command, Data]:
+    def parse_store(self, register, op, val) -> Tuple[Command, Thunk]:
         if not re.match("\w*[a-z]\w*", register):
             raise InvalidInput("register was not alphanumeric with at least one letter")
 
@@ -62,16 +64,31 @@ class SimpleCalculator:
         except ValueError:
             raise InvalidInput(f"'{val}' is not a valid value")
 
-        return self.store, Data(target=register, operation=operation, value=value)
+        return self.store, Thunk(target=register, operation=operation, value=value)
 
-    def parse_print(self, command, register) -> Tuple[Command, Data | Number]:
+    def parse_print(self, command, register) -> Tuple[Command, Thunk | Number]:
         if command != "print":
             raise InvalidInput(f"bad syntax: '{command}' is not a valid command")
 
         return print, self.evaluate(register)
 
-    def store(self, data: Data):
-        pass
+    def store(self, thunk: Thunk):
+        self._thunks_[thunk.target].append(thunk)
 
     def evaluate(self, register) -> Number:
-        return self._memory_[register]
+
+        # this is the value of the register so far
+        value = self._values_[register]
+
+        # apply and clear the pending operations
+        for thunk in self._thunks_.pop(register, []):
+            value = thunk.operation(value, thunk.value)
+
+        # apply the value back
+        self._values_[register] = value
+
+        try:
+            # If a number is an int and not a float, remove the .0 from the output
+            return int(value)
+        except ValueError:
+            return value

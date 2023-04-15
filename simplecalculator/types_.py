@@ -6,6 +6,7 @@ from typing import NewType, Callable
 from collections import namedtuple
 
 
-Data = namedtuple("Data", ["target", "operation", "value"])
+# Lazily evaluated target, operation and value
+Thunk = namedtuple("Thunk", ["target", "operation", "value"])
 
-Command = NewType('Command', Callable[[Data], None])
+Command = NewType('Command', Callable[[Thunk], None])

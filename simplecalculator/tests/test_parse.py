@@ -5,7 +5,7 @@ Unit tests for the method parse
 import unittest
 
 from simplecalculator.exceptions import InvalidInput
-from simplecalculator.types_ import Data
+from simplecalculator.types_ import Thunk
 from simplecalculator.operations import add
 from simplecalculator import SimpleCalculator
 
@@ -71,4 +71,4 @@ class TestParse3Params(unittest.TestCase):
         command, data = calculator.parse("a add 10")
 
         self.assertEqual(command, calculator.store)
-        self.assertEqual(data, Data("a", add, 10))
+        self.assertEqual(data, Thunk("a", add, 10))
