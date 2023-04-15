@@ -9,7 +9,7 @@ Syntax:
 <register> <operation> <value> OR print <register>
 ```
 
-Alphanumeric means a combination of [a-z] and [0-9], with at least one of the former.
+All registers are alphanumeric, which means a combination of [a-z] and [0-9], with at least one of the former.
 
 Circular dependencies are avoided by only evaluating pending thunks for a register once. Consider the following case:
 ```
@@ -83,3 +83,7 @@ $ make console
 > quit
 <program exits>
 ```
+
+## Suggestions for Extensions
+- Simply add new operations in the operations.py to extend with division, etc.
+- To support a no-argument command like 'reset' (delete all input data stored in session), simply edit the parse method and add a handler, similar to how print is handled 

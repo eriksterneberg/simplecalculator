@@ -23,7 +23,7 @@ class SimpleCalculator:
 
     def process(self, line: str) -> None:
         """
-        Stores or prints (evaluates stored) lazy values
+        Stores or prints values. Any value stored is evaluated only when printed.
 
         :param line: string input value from user
         :return: None
@@ -36,7 +36,7 @@ class SimpleCalculator:
 
     def parse(self, line: str) -> Tuple[Action, Thunk | Number]:
         """
-        A pure function which returns an Action and a Thunk or Number. This is a pure function, to make UT easier.
+        Returns a line parsed into an Action and a parameter to be fed into that action.
 
         A well-formed line of input has the following syntax:
         <register> <operation> <value> OR print <register>
@@ -56,7 +56,7 @@ class SimpleCalculator:
 
     def parse_store(self, register, op, val) -> Tuple[Action, Thunk]:
         """
-        Takes three arguments that signify the operation its parameters that should be lazily executed.
+        Takes three arguments that signify the operation and its parameters that should be lazily executed.
 
         :param register: an alphanumeric value
         :param op: operation, such as add, mul or sub from the operator module in the standard library
@@ -83,6 +83,7 @@ class SimpleCalculator:
 
     def parse_print(self, action, register) -> Tuple[Action, Number]:
         """
+        Evaluates registers as needed and prints to console
 
         :param action: currently only support the action 'print'
         :param register: register, will evaluate to zero if previously unseen
@@ -108,16 +109,15 @@ class SimpleCalculator:
         Computes thunks pending for a register. Operates recursively and evaluates dependant values as needed.
 
         :param key: either register or value
-        :return: evaluated number, which is an int or a float
+        :return: evaluated number, which is either an int or a float
         """
         if isinstance(key, Number):
-            return key
+            return key  # key was a number, which will happen when evaluate calls itself recursively using a number
 
-        register = key
-        value = self._values_[register]
+        value = self._values_[key]
 
         # Apply and clear the pending operations
-        for thunk in self._thunks_.pop(register, []):
+        for thunk in self._thunks_.pop(key, []):
             try:
                 # Apply recursive evaluation to evaluate dependencies
                 value = thunk.operation(value, self.evaluate(thunk.value))
@@ -125,7 +125,7 @@ class SimpleCalculator:
                 print(e)  # The input is rejected and the value is unchanged
 
         # Put evaluated value back into memory
-        self._values_[register] = value
+        self._values_[key] = value
 
         # If a number is an int and not a float, remove the .0 from the output
         return integer if (integer := int(value)) == value else value
