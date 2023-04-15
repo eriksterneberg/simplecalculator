@@ -1,8 +1,8 @@
 # simplecalculator
 Demo app to showcase writing Python FP-style
 
-## Why this project?
-Todo
+## Description
+The task is to build a simple calculator that can take commands from stdin or from a file.
 
 ## How to Build
 Todo
@@ -11,8 +11,8 @@ Todo
 Todo
 
 ## Roadmap
-- [ ] Create a main.py file that takes input from stdin one line at a time and prints it in the terminal.
-- [ ] Entering "quit" (case in-sensitive) should exit.
+- [X] Create a main.py file that takes input from stdin one line at a time and prints it in the terminal.
+- [X] Entering "quit" (case in-sensitive) should exit.
 - [ ] Invalid commands should be logged to console. This includes values that causes operations to fail, such as "a divide 0".
 - [ ] Add a class that takes the input and returns a command to quit if the input was "quit" (case in-sensitive).
 - [ ] Upgrade class to store operations under keys like "A add 2", the keys also being case in-sensitive. Also add an internal "evaluate" method to evaluate thunks for a certain key.
