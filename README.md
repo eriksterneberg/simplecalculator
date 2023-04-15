@@ -4,10 +4,13 @@ Demo app to showcase writing basic Python syntax
 ## Description
 The task is to build a simple calculator that can take commands from stdin or from a file.
 
-On Definition of Alphanumeric:
+Syntax:
+```
+<register> <operation> <value> OR print <register>
+```
+
 Alphanumeric means a combination of [a-z] and [0-9], with at least one of the former.
 
-On Circular Dependencies:
 Circular dependencies are avoided by only evaluating pending thunks for a register once. Consider the following case:
 ```
 a add b
@@ -45,8 +48,10 @@ $ python3.11 main.py tests/test1.txt
 5
 3
 6
+
 $ python3.11 main.py tests/test2.txt
 11
+
 $ python3.11 main.py tests/test3.txt
 90
 ```
