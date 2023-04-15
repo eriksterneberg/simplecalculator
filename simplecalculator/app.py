@@ -90,8 +90,8 @@ class SimpleCalculator:
         # apply the value back
         self._values_[register] = value
 
-        try:
-            # If a number is an int and not a float, remove the .0 from the output
-            return int(value)
-        except ValueError:
-            return value
+        # If a number is an int and not a float, remove the .0 from the output
+        if (integer := int(value)) == value:
+            return integer
+
+        return value

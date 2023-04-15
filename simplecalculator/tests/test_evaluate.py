@@ -15,7 +15,7 @@ class TestEvaluate_Simple(unittest.TestCase):
         result = SimpleCalculator().evaluate("missing")
         self.assertEqual(result, 0)
 
-    def test_evaluate_simple_operations(self):
+    def test_evaluate_simple_operations_using_integers(self):
         calculator = SimpleCalculator()
 
         for thunk in Thunk("a", sub, 5), Thunk("a", mul, 2), Thunk("a", add, 50):
@@ -26,8 +26,14 @@ class TestEvaluate_Simple(unittest.TestCase):
             result = calculator.evaluate("a")
             self.assertEqual(result, 40)
 
-    # Todo: add case for floats
+    def test_evaluate_simple_operations_using_floats(self):
+        calculator = SimpleCalculator()
 
+        for thunk in Thunk("a", add, 1.3), Thunk("a", mul, 2):
+            calculator.store(thunk)
+
+        result = calculator.evaluate("a")
+        self.assertEqual(result, 2.6)
 
 class TestEvaluateRegistersAsValues(unittest.TestCase):
 
