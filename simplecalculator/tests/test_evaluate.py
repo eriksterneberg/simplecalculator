@@ -13,7 +13,7 @@ class TestEvaluateSimple(unittest.TestCase):
 
     def test_evaluate_missing_register(self):
         result = SimpleCalculator().evaluate("missing")
-        self.assertEqual(result, 0)
+        self.assertEqual(0, result)
 
     def test_evaluate_simple_operations_using_integers(self):
         calculator = SimpleCalculator().store(
@@ -25,16 +25,25 @@ class TestEvaluateSimple(unittest.TestCase):
         # After having evaluated a value, it
         for _ in range(2):
             result = calculator.evaluate("a")
-            self.assertEqual(result, 40)
+            self.assertEqual(40, result)
 
     def test_evaluate_simple_operations_using_floats(self):
         result = SimpleCalculator().store(Thunk("a", add, 1.3), Thunk("a", mul, 2)).evaluate("a")
-        self.assertEqual(result, 2.6)
+        self.assertEqual(2.6, result)
 
 
 class TestEvaluateRegistersAsValues(unittest.TestCase):
 
-    def test_evaluate_register_as_value_happy_path(self):
+    def test_evaluate_register_as_value_happy_path_1(self):
+        calculator = SimpleCalculator().store(
+            Thunk("a", add, 10),
+            Thunk("b", add, "a"),
+            Thunk("b", add, 1),
+        )
+
+        self.assertEqual(11, calculator.evaluate("b"))
+
+    def test_evaluate_register_as_value_happy_path_2(self):
         calculator = SimpleCalculator().store(
             Thunk("result", add, "revenue"),
             Thunk("result", sub, "costs"),
@@ -45,7 +54,7 @@ class TestEvaluateRegistersAsValues(unittest.TestCase):
             Thunk("costs", add, 10),
         )
 
-        self.assertEqual(calculator.evaluate("result"), 90)
+        self.assertEqual(90, calculator.evaluate("result"))
 
     # def test_evaluate_register_as_value_circular(self):
     #     calculator = SimpleCalculator()

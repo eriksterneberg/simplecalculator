@@ -14,7 +14,6 @@ class TestParseZeroOrTooManyParams(unittest.TestCase):
 
     def test_parse_bad_number_of_arguments(self):
         for line in "", "a", "a b c d":
-
             with self.assertRaises(InvalidInput) as cm:
                 SimpleCalculator().parse(line)
 
@@ -27,18 +26,18 @@ class TestParseTwoParams(unittest.TestCase):
         with self.assertRaises(InvalidInput) as cm:
             SimpleCalculator().parse("non_existant_command a")
 
-        self.assertEqual((str(cm.exception)), "bad syntax: 'non_existant_command' is not a valid command")
+        self.assertEqual("bad syntax: 'non_existant_command' is not a valid command", (str(cm.exception)))
 
     def test_happy_path(self):
         command, data = SimpleCalculator().parse("print a")
 
-        self.assertEqual(command, print)
-        self.assertEqual(data, 0)
+        self.assertEqual(print, command)
+        self.assertEqual(0, data)
 
         command, data = SimpleCalculator().store(Thunk("a", add, 10)).parse("print a")
 
-        self.assertEqual(command, print)
-        self.assertEqual(data, 10)
+        self.assertEqual(print, command)
+        self.assertEqual(10, data)
 
 
 class TestParse3Params(unittest.TestCase):
@@ -50,24 +49,32 @@ class TestParse3Params(unittest.TestCase):
             with self.assertRaises(InvalidInput) as cm:
                 calculator.parse(f"{bad_register} operation value")
 
-            self.assertEqual(str(cm.exception), "register was not alphanumeric with at least one letter")
+            self.assertEqual("register was not alphanumeric with at least one letter", str(cm.exception))
 
     def test_operation_not_supported(self):
         with self.assertRaises(InvalidInput) as cm:
             SimpleCalculator().parse("a unknown_operator value")
 
-        self.assertEqual(str(cm.exception), "'unknown_operator' is not a supported operation")
+        self.assertEqual("'unknown_operator' is not a supported operation", str(cm.exception))
 
     def test_value_is_not_numeric(self):
         with self.assertRaises(InvalidInput) as cm:
-            SimpleCalculator().parse("a add not_a_number")
+            SimpleCalculator().parse("a add not_a_number_or_register")
 
-        self.assertEqual(str(cm.exception), "'not_a_number' is not a valid value")
+        self.assertEqual("'not_a_number_or_register' is not a valid value", str(cm.exception))
 
-    def test_happy_path(self):
+    def test_happy_path_simple_integer(self):
         calculator = SimpleCalculator()
 
         command, data = calculator.parse("a add 10")
 
-        self.assertEqual(command, calculator.store)
-        self.assertEqual(data, Thunk("a", add, 10))
+        self.assertEqual(calculator.store, command)
+        self.assertEqual(Thunk("a", add, 10), data)
+
+    def test_happy_path_register(self):
+        calculator = SimpleCalculator()
+
+        command, data = calculator.parse("a add b")
+
+        self.assertEqual(calculator.store, command)
+        self.assertEqual(Thunk("a", add, "b"), data)

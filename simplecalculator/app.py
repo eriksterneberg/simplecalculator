@@ -3,7 +3,7 @@ Implements all pure and impure methods that make up the Simple Calculator showca
 """
 
 import re
-from typing import Tuple, List
+from typing import Tuple
 from numbers import Number
 from collections import defaultdict
 
@@ -52,7 +52,7 @@ class SimpleCalculator:
         raise InvalidInput("bad syntax: only 2 or 3 arguments allowed, delimited by space")
 
     def parse_store(self, register, op, val) -> Tuple[Command, Thunk]:
-        if not re.match("\w*[a-z]\w*", register):
+        if not is_valid_register(register):
             raise InvalidInput("register was not alphanumeric with at least one letter")
 
         operation = operations.get(op)
@@ -63,7 +63,10 @@ class SimpleCalculator:
         try:
             value = float(val)
         except ValueError:
-            raise InvalidInput(f"'{val}' is not a valid value")
+            if is_valid_register(val):
+                value = val
+            else:
+                raise InvalidInput(f"'{val}' is not a valid value")
 
         return self.store, Thunk(target=register, operation=operation, value=value)
 
@@ -84,19 +87,27 @@ class SimpleCalculator:
         return self
 
     def evaluate(self, register) -> Number:
-        # this is the value of the register so far
-        value = self._values_[register]
 
         # apply and clear the pending operations
         for thunk in self._thunks_.pop(register, []):
             try:
+                # Apply recursive evaluation to evaluate dependencies
                 right = thunk.value if isinstance(thunk.value, Number) else self.evaluate(thunk.value)
-                value = thunk.operation(value, right)
+                self._values_[register] = thunk.operation(self._values_[register], right)
             except Exception as e:
                 print(e)  # The input is rejected and the value is unchanged
 
-        # apply the value back
-        self._values_[register] = value
-
         # If a number is an int and not a float, remove the .0 from the output
+        value = self._values_[register]
         return integer if (integer := int(value)) == value else value
+
+
+def is_valid_register(register: str) -> bool:
+    """
+    A valid register string is at least one character [a-z] preceeded and followed by any numnber of
+    alphanumeric strings [a-z0-9]
+
+    :param register:
+    :return: bool
+    """
+    return re.match('^[a-z0-9]*[a-z][a-z0-9]*$', register) is not None
