@@ -76,13 +76,16 @@ class SimpleCalculator:
         self._thunks_[thunk.target].append(thunk)
 
     def evaluate(self, register) -> Number:
-
         # this is the value of the register so far
         value = self._values_[register]
 
         # apply and clear the pending operations
         for thunk in self._thunks_.pop(register, []):
-            value = thunk.operation(value, thunk.value)
+            try:
+                right = thunk.value if isinstance(thunk.value, Number) else self.evaluate(thunk.value)
+                value = thunk.operation(value, right)
+            except Exception as e:
+                print(e)  # The input is rejected and the value is unchanged
 
         # apply the value back
         self._values_[register] = value

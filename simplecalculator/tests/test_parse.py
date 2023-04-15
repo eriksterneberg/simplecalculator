@@ -35,11 +35,13 @@ class TestParseTwoParams(unittest.TestCase):
         self.assertEqual(command, print)
         self.assertEqual(data, 0)
 
-        # Todo: add case for when register is not zero
-        # command, data = SimpleCalculator().parse("print a")
-        #
-        # self.assertEqual(command, print)
-        # self.assertEqual(data, 0)
+        calculator = SimpleCalculator()
+        calculator.store(Thunk("a", add, 10))
+
+        command, data = calculator.parse("print a")
+
+        self.assertEqual(command, print)
+        self.assertEqual(data, 10)
 
 
 class TestParse3Params(unittest.TestCase):
