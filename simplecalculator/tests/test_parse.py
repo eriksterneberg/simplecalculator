@@ -26,7 +26,7 @@ class TestParseTwoParams(unittest.TestCase):
         self.assertEqual("bad syntax: 'non_existant_action' is not a valid action", (str(cm.exception)))
 
     def test_happy_path(self):
-        action, data = SimpleCalculator().parse("print a")
+        action, data = SimpleCalculator().parse("print    a")  # multiple spaces are ignored
 
         self.assertEqual(print, action)
         self.assertEqual(0, data)

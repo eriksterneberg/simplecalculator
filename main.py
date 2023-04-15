@@ -3,13 +3,24 @@ Entry point for the Simple Calculator project
 """
 
 import sys
+import signal
 from collections.abc import Generator
 
-from simplecalculator import SimpleCalculator
+from simplecalculator import SimpleCalculator, Actions
 
 
-class Commands:
-    QUIT = "quit"
+shutdown = False
+
+
+def graceful_exit(signum, frame):
+    """
+    User can signal graceful shutdown by CTRL+C
+    """
+    global shutdown
+    shutdown = True
+
+
+signal.signal(signal.SIGINT, graceful_exit)
 
 
 def get_lines() -> Generator[str]:
@@ -36,10 +47,13 @@ def get_lines() -> Generator[str]:
 
     else:
         # Falls back to looping over user input until the string 'quit' is encountered.
-        while True:
-            string = input("> ").strip().lower()  # Leading and trailing whitespace is removed.
+        while not shutdown:
+            try:
+                string = input("> ").strip().lower()  # Leading and trailing whitespace is removed.
+            except EOFError:
+                break  # user signalled EOF using CTRL+D
 
-            if string == Commands.QUIT:
+            if string == Actions.QUIT:
                 break
 
             if string == "":

@@ -3,11 +3,12 @@ Implements all pure and impure methods that make up the Simple Calculator showca
 """
 
 import re
+import signal
 from typing import Tuple
 from numbers import Number
 from collections import defaultdict
 
-from .types_ import Action, Thunk
+from .types_ import Action, Actions, Thunk
 from .exceptions import InvalidInput
 from .operations import operations
 
@@ -41,7 +42,7 @@ class SimpleCalculator:
         :param line: string input value from user
         :return: (Action, Data), where the Action
         """
-        items = line.split(" ")
+        items = re.split("\\s+", line)
 
         if len(items) == 3:
             return self.parse_store(*items)
@@ -71,7 +72,7 @@ class SimpleCalculator:
         return self.store, Thunk(target=register, operation=operation, value=value)
 
     def parse_print(self, action, register) -> Tuple[Action, Thunk | Number]:
-        if action != "print":
+        if action != Actions.PRINT:
             raise InvalidInput(f"bad syntax: '{action}' is not a valid action")
 
         return print, self.evaluate(register)
@@ -121,4 +122,4 @@ def is_valid_register(register: str) -> bool:
     :param register:
     :return: bool
     """
-    return re.match('^[a-z0-9]*[a-z][a-z0-9]*$', register) is not None
+    return re.match("^[a-z0-9]*[a-z][a-z0-9]*$", register) is not None

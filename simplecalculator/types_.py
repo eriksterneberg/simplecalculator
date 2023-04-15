@@ -12,3 +12,11 @@ Thunk = namedtuple("Thunk", ["target", "operation", "value"])
 # Action is either the print command which prints to console, or the store function,
 # which simply stores the thunk in memory
 Action = NewType('Action', Callable[[Thunk], None])
+
+
+class Actions:
+    """
+    List of actions used by SimpleCalculator
+    """
+    QUIT = "quit"
+    PRINT = "print"
