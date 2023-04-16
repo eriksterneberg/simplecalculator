@@ -49,13 +49,14 @@ class SimpleCalculator:
         :return: Action, Thunk | Number
         """
         if len(items := re.split("\\s+", line)) == 3:
-            return self.parse_store(*items)
+            return self.parse_three_args(*items)
         elif len(items) == 2:
-            return self.parse_print(*items)
+            return self.parse_two_args(*items)
         raise InvalidInput("bad syntax: only 2 or 3 arguments allowed, delimited by any amount of whitespace")
 
-    def parse_store(self, register, op, val) -> Tuple[Action, Thunk]:
+    def parse_three_args(self, register, op, val) -> Tuple[Action, Thunk]:
         """
+        Currently only supports the <register> <operation> <value> command.
         Takes three arguments that signify the operation and its parameters that should be lazily executed.
 
         :param register: an alphanumeric value
@@ -81,8 +82,9 @@ class SimpleCalculator:
 
         return self.store, Thunk(target=register, operation=operation, value=value)
 
-    def parse_print(self, action, register) -> Tuple[Action, Number]:
+    def parse_two_args(self, action, register) -> Tuple[Action, Number]:
         """
+        Currently only supports the print <register> command.
         Evaluates registers as needed and prints to console
 
         :param action: currently only support the action 'print'
@@ -104,28 +106,25 @@ class SimpleCalculator:
             self._thunks_[thunk.target].append(thunk)
         return self
 
-    def evaluate(self, key) -> Number:
+    def evaluate(self, register) -> Number:
         """
         Computes thunks pending for a register. Operates recursively and evaluates dependant values as needed.
 
-        :param key: either register or value
+        :param register: register
         :return: evaluated number, which is either an int or a float
         """
-        if isinstance(key, Number):
-            return key  # key was a number, which will happen when evaluate calls itself recursively using a number
-
-        value = self._values_[key]
+        value = self._values_[register]
 
         # Apply and clear the pending operations
-        for thunk in self._thunks_.pop(key, []):
+        for t in self._thunks_.pop(register, []):
             try:
                 # Apply recursive evaluation to evaluate dependencies
-                value = thunk.operation(value, self.evaluate(thunk.value))
+                value = t.operation(value, t.value if isinstance(t.value, Number) else self.evaluate(t.value))
             except Exception as e:
                 print(e)  # The input is rejected and the value is unchanged
 
         # Put evaluated value back into memory
-        self._values_[key] = value
+        self._values_[register] = value
 
         # If a number is an int and not a float, remove the .0 from the output
         return integer if (integer := int(value)) == value else value

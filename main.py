@@ -20,6 +20,7 @@ def graceful_exit(signum, frame):
     shutdown = True
 
 
+# Register SIGINT handler
 signal.signal(signal.SIGINT, graceful_exit)
 
 
@@ -31,20 +32,15 @@ def get_lines() -> Generator[str]:
     :return: Generator[str], a Python generator with strings as the type
     """
     if len(sys.argv) == 2:
-        filename = sys.argv[1]
-
         # Take lines from input file; read lines one at a time to decrease memory usage
         try:
-            with open(filename) as f:
+            with open(filename := sys.argv[1]) as f:
                 for row in f:
                     if len(row_ := row.strip().lower()) > 0:  # ignore empty lines
                         yield row_
         except FileNotFoundError:
-
-            # File not found, will exit loop. When 'return' is used this will exit a for loop looping over get_lines.
             print(f"file {filename} does not exist")
-            return
-
+            return  # Will exit any outer for loop
     else:
         # Falls back to looping over user input until the string 'quit' is encountered.
         while not shutdown:
