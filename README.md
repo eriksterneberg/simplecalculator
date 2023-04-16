@@ -85,5 +85,6 @@ $ make console
 ```
 
 ## Suggestions for Extensions
-- Simply add new operations in the operations.py to extend with division, etc.
-- To support a no-argument command like 'reset' (delete all input data stored in session), simply edit the parse method and add a handler, similar to how print is handled 
+- Add new operations in the operations.py to extend with division, etc. A blanket catch-all try/except will catch any error raised, in which case the operation will be ignored.
+- To increase accuracy of floating point arithmetic (for when division is used), the base data type float could be replaced with decimal (https://docs.python.org/3/library/decimal.html)
+- To support a no-argument command like 'reset' (delete all input data stored in session), simply edit the parse method and add a handler, similar to how print is handled.

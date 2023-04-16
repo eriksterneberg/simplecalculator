@@ -16,7 +16,6 @@ class SimpleCalculator:
     """
     A showcase of how to implement a simple calculator with lazy evaluation
     """
-
     def __init__(self):
         self._thunks_ = defaultdict(list)
         self._values_ = defaultdict(int)
@@ -24,7 +23,6 @@ class SimpleCalculator:
     def process(self, line: str) -> None:
         """
         Stores or prints values. Any value stored is evaluated only when printed.
-
         :param line: string input value from user
         :return: None
         """
@@ -75,12 +73,11 @@ class SimpleCalculator:
         try:
             value = float(val)  # treat numbers as float to not lose decimals
         except ValueError:
-            if is_valid_register(val):
-                value = val
-            else:
+            if not is_valid_register(val):
                 raise InvalidInput(f"'{val}' is not a valid value")
+            value = val
 
-        return self.store, Thunk(target=register, operation=operation, value=value)
+        return self.store, Thunk(target=register, op=operation, value=value)
 
     def parse_two_args(self, action, register) -> Tuple[Action, Number]:
         """
@@ -100,7 +97,7 @@ class SimpleCalculator:
         """
         Store pending operations in memory
         :param thunks: variadic list of Thunk, to be added to pending operations
-        :return: self
+        :return: self, in order to be able to chain commands
         """
         for thunk in thunks:
             self._thunks_[thunk.target].append(thunk)
@@ -119,7 +116,7 @@ class SimpleCalculator:
         for t in self._thunks_.pop(register, []):
             try:
                 # Apply recursive evaluation to evaluate dependencies
-                value = t.operation(value, t.value if isinstance(t.value, Number) else self.evaluate(t.value))
+                value = t.op(value, t.value if isinstance(t.value, Number) else self.evaluate(t.value))
             except Exception as e:
                 print(e)  # The input is rejected and the value is unchanged
 
@@ -134,7 +131,7 @@ def is_valid_register(register: str) -> bool:
     """
     A valid register string is at least one character [a-z] preceded and followed by any number of alphanumeric strings
 
-    :param register:
+    :param register: an alphanumeric string
     :return: bool
     """
     return re.match("^[a-z0-9]*[a-z][a-z0-9]*$", register) is not None
